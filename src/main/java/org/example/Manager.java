@@ -17,11 +17,7 @@ public class Manager {
     }
 
     public void addRobotToMap(Robot robot) {
-        var robotQueue = typeRobotMap.get(robot.getType());
-        if (robotQueue == null) {
-            robotQueue = new ArrayDeque<>();
-            typeRobotMap.put(robot.getType(), robotQueue);
-        }
+        var robotQueue = typeRobotMap.computeIfAbsent(robot.getType(), k -> new ArrayDeque<>());
         robotQueue.add(robot);
     }
 
@@ -34,5 +30,9 @@ public class Manager {
         } else {
             robot.doWork(task);
         }
+    }
+
+    public void notifyTaskCompleted(Robot robot) {
+        addRobotToMap(robot);
     }
 }

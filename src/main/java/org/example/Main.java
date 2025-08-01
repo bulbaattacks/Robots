@@ -19,7 +19,7 @@ public class Main {
 
         for (var task : taskList) {
             manager.addTaskToQueue(task);
-            var robot = RobotFactory.create(task.robotType);
+            var robot = RobotFactory.createRobotWithManager(task.robotType, manager);
             manager.addRobotToMap(robot);
         }
 
