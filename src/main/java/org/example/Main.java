@@ -1,7 +1,6 @@
 package org.example;
 
 import org.example.robot.Robot;
-import org.example.robot.RobotFactory;
 
 import java.util.List;
 
@@ -19,12 +18,12 @@ public class Main {
 
         for (var task : taskList) {
             manager.addTaskToQueue(task);
-            var robot = RobotFactory.createRobotWithManager(task.robotType, manager);
-            manager.addRobotToMap(robot);
+//            var robot = RobotFactory.createRobotWithManager(task.robotType, manager);
+//            manager.addRobotToMap(robot);
         }
 
         while (manager.hasTask()) {
-            manager.doTask();
+            manager.manageWork();
         }
 
     }
