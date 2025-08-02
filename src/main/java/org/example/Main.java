@@ -18,9 +18,18 @@ public class Main {
 
         for (var task : taskList) {
             manager.addTaskToQueue(task);
-//            var robot = RobotFactory.createRobotWithManager(task.robotType, manager);
-//            manager.addRobotToMap(robot);
         }
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.work(Robot.Type.UNIVERSAL, "KILL and CLEAN"));
+        manager.addTaskToQueue(Task.shutDown(Robot.Type.UNIVERSAL));
+        manager.addTaskToQueue(Task.shutDown(Robot.Type.UNIVERSAL));
+        manager.addTaskToQueue(Task.shutDown(Robot.Type.UNIVERSAL));
+        manager.addTaskToQueue(Task.shutDown(Robot.Type.UNIVERSAL));
 
         while (manager.hasTask()) {
             manager.manageWork();

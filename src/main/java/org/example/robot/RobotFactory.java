@@ -12,7 +12,13 @@ public interface RobotFactory {
                 return new RobotCleaner(manager);
             }
             case Robot.Type.UNIVERSAL -> {
-                return new RobotTerminator(manager); // TODO: return random robot
+                int idx = (int) (Math.random() * Robot.Type.values().length);
+                var rt = Robot.Type.values()[idx];
+                if (rt == Robot.Type.UNIVERSAL) {
+                    rt = Robot.Type.values()[idx-1];
+                }
+                System.out.println("hello from createRobotWithManager " + rt);
+                return createRobotWithManager(rt, manager);
             }
             default -> throw new IllegalArgumentException("Robot type not supported: " + type);
         }
