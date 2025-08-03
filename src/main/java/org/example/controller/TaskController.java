@@ -6,7 +6,9 @@ import org.example.dto.SingleTaskDto;
 import org.example.model.Task;
 import org.example.service.LogService;
 import org.example.service.Manager;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
@@ -25,7 +27,8 @@ public class TaskController {
         switch (dto.getActionType()) {
             case DO_WORK -> task = Task.workForAll(dto.getPayload());
             case SHUT_DOWN -> task = Task.shutDownForAll();
-            default -> throw new IllegalArgumentException("actionType type " + dto.getActionType() + " not supported");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "ActionType type %s not supported".formatted(dto.getActionType()));
         }
         manager.addTask(task);
         logService.log("Thread: %s, Broadcast task submitted %s".formatted(Thread.currentThread().getName(), task));
@@ -37,7 +40,8 @@ public class TaskController {
         switch (dto.getActionType()) {
             case DO_WORK -> task = Task.work(dto.getRobotType(), dto.getPayload());
             case SHUT_DOWN -> task = Task.shutDown(dto.getRobotType());
-            default -> throw new IllegalArgumentException("actionType type " + dto.getActionType() + " not supported");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "ActionType type %s not supported".formatted(dto.getActionType()));
         }
         manager.addTask(task);
         logService.log("Thread: %s, Single task submitted %s".formatted(Thread.currentThread().getName(), task));
