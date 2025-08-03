@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        form { margin-bottom: 2rem; }
+        #logs { border: 1px solid #ccc; padding: 1rem; height: 200px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+
+<h1>Submit Tasks</h1>
+
+<section>
+    <h2>Single Task</h2>
+    <form id="singleForm">
+        <label>Action:
+            <select name="actionType">
+                <option value="DO_WORK">Do Work</option>
+                <option value="SHUT_DOWN">Shut Down</option>
+            </select>
+        </label>
+        <label>Robot Type:
+            <select name="robotType">
+                <option value="TERMINATOR">Terminator</option>
+                <option value="CLEANER">Cleaner</option>
+            </select>
+        </label>
+        <label>Payload:
+            <input type="text" name="payload"/>
+        </label>
+        <button type="submit">Send Single</button>
+    </form>
+</section>
+
+<section>
+    <h2>Broadcast Task</h2>
+    <form id="broadcastForm">
+        <label>Action:
+            <select name="actionType">
+                <option value="DO_WORK">Do Work</option>
+                <option value="SHUT_DOWN">Shut Down</option>
+            </select>
+        </label>
+        <label>Payload:
+            <input type="text" name="payload"/>
+        </label>
+        <button type="submit">Send Broadcast</button>
+    </form>
+</section>
+
+<section>
+    <h2>Real-Time Logs</h2>
+    <div id="logs"></div>
+</section>
+
+<script>
+    const logContainer = document.getElementById('logs');
+    const sse = new EventSource('/api/logs/stream');
+    sse.addEventListener('log-event', e => {
+      const p = document.createElement('div');
+      p.textContent = new Date().toLocaleTimeString() + ' – ' + e.data;
+      logContainer.appendChild(p);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    });
+
+    function postJson(url, data) {
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    }
+
+    document.getElementById('singleForm')
+      .addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        postJson('/api/tasks/single', {
+          actionType: fd.get('actionType'),
+          robotType: fd.get('robotType'),
+          payload: fd.get('payload')
+        });
+      });
+
+    document.getElementById('broadcastForm')
+      .addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        postJson('/api/tasks/broadcast', {
+          actionType: fd.get('actionType'),
+          payload: fd.get('payload')
+        });
+      });
+</script>
+
+</body>
+</html>

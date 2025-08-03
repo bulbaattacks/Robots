@@ -1,21 +1,24 @@
-package org.example;
+package org.example.model;
 
-import org.example.robot.Robot;
+import org.example.model.robot.Robot;
 
 public class Task {
     public final Type taskType;
     public final Action actionType;
     public final Robot.Type robotType;
-    public String payload;
+    public final String payload;
 
     private Task(Action actionType, Task.Type taskType, Robot.Type robotType) {
         this.actionType = actionType;
         this.taskType = taskType;
         this.robotType = robotType;
+        this.payload = null;
     }
 
     private Task(Action actionType, Task.Type taskType, Robot.Type robotType, String payload) {
-        this(actionType, taskType, robotType);
+        this.actionType = actionType;
+        this.taskType = taskType;
+        this.robotType = robotType;
         this.payload = payload;
     }
 
@@ -37,4 +40,14 @@ public class Task {
 
     public enum Type {SINGLE, BROADCAST}
     public enum Action {DO_WORK, SHUT_DOWN}
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "taskType=" + taskType +
+                ", actionType=" + actionType +
+                ", robotType=" + robotType +
+                ", payload='" + payload + '\'' +
+                '}';
+    }
 }

@@ -1,6 +1,6 @@
-package org.example.robot;
+package org.example.model.robot;
 
-import org.example.Task;
+import org.example.model.Task;
 
 public interface Robot {
     void doWork(Task task);

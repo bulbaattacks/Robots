@@ -1,4 +1,4 @@
-package org.example.robot;
+package org.example.model.robot;
 
 public class RobotCleaner extends AbstractRobot {
 

@@ -1,6 +1,7 @@
-package org.example.robot;
+package org.example.model.robot;
 
-import org.example.Task;
+import org.example.model.Task;
+import org.example.service.LogService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,12 +9,12 @@ import java.util.concurrent.Executors;
 public abstract class AbstractRobot implements Robot {
     private static int counter = 0;
 
+    private final LogService logService = LogService.getInstance();
+    private final Robot.Type type;
+    private final int id;
+    private final long workingTime;
     private final ExecutorService singleThreadExecutor;
     private volatile boolean isBusy;
-    private final long workingTime;
-
-    protected final Robot.Type type;
-    protected final int id;
 
     protected AbstractRobot(Robot.Type type, long workingTime) {
         this.type = type;
@@ -26,7 +27,7 @@ public abstract class AbstractRobot implements Robot {
     public void doWork(Task task) {
         singleThreadExecutor.submit(() -> {
             isBusy = true;
-            System.out.println("Thread: " + Thread.currentThread().getName() + ", task is: " + task.payload);
+            logService.log("Thread: %s, task is: %s".formatted(Thread.currentThread().getName(), task.payload));
             sleep(workingTime);
             isBusy = false;
         });
@@ -36,7 +37,7 @@ public abstract class AbstractRobot implements Robot {
     public void shutDown() {
         singleThreadExecutor.submit(() -> {
             isBusy = true;
-            System.out.println("Thread: " + Thread.currentThread().getName() + ", do shutdown");
+            logService.log("Thread: %s, do shutdown".formatted(Thread.currentThread().getName()));
             sleep(workingTime);
             isBusy = false;
         });

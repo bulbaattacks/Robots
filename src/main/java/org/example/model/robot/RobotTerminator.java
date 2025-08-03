@@ -1,4 +1,4 @@
-package org.example.robot;
+package org.example.model.robot;
 
 public class RobotTerminator extends AbstractRobot {
 

@@ -1,7 +1,10 @@
-package org.example;
+package org.example.service;
 
-import org.example.robot.Robot;
-import org.example.robot.RobotFactory;
+import org.example.model.Task;
+import org.example.model.robot.Robot;
+import org.example.model.robot.RobotFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -10,8 +13,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+@Service
 public class Manager {
-    final Map<Robot.Type, BlockingQueue<Robot>> availableRobotMap = new EnumMap<>(Robot.Type.class);
+    private final LogService logService = LogService.getInstance();
+
+    private final Map<Robot.Type, BlockingQueue<Robot>> availableRobotMap = new EnumMap<>(Robot.Type.class);
     private final BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<>();
 
     public Manager() {
@@ -34,9 +40,9 @@ public class Manager {
                 .add(robot);
     }
 
-    public void manageWork() {
+    @Scheduled(fixedDelay = 500)
+    private void manageWork() {
         if (!hasTask()) {
-            System.out.println("Thread: " + Thread.currentThread().getName() + ", no tasks available");
             return;
         }
 
@@ -50,13 +56,13 @@ public class Manager {
     private void assignTaskForOneRobot(Task task) {
         var robotType = task.robotType;
         var robotQueue = availableRobotMap.get(robotType);
-        System.out.println("Thread: " + Thread.currentThread().getName() + " task for one robot " + robotType + " --> " + task.actionType);
+        logService.log("Thread: %s,  task for %s robot --> %s".formatted(Thread.currentThread().getName(), robotType, task.actionType));
 
         var robot = robotQueue.peek();
 
         if (task.actionType == Task.Action.SHUT_DOWN) {
             if (robot == null) {
-                System.out.println("Thread: " + Thread.currentThread().getName() + " all robots " + robotType + " are down already");
+                logService.log("Thread: %s, all robots %s are down already".formatted(Thread.currentThread().getName(), robotType));
                 return;
             }
             robot = robotQueue.poll();
@@ -75,12 +81,12 @@ public class Manager {
     }
 
     private void assignTaskForAllRobots(Task task) {
-        System.out.println("Thread: " + Thread.currentThread().getName() + ", assign task to all robots " + task.actionType);
+        logService.log("Thread: %s, assign task to all robots, %s".formatted(Thread.currentThread().getName(), task.actionType));
 
         availableRobotMap.forEach((robotType, robotQueue) -> {
             if (task.actionType == Task.Action.DO_WORK) {
                 if (robotQueue.isEmpty()) {
-                    System.out.println("Thread: " + Thread.currentThread().getName() + ", no robots available --> creating robot");
+                    logService.log("Thread: %s, , no robots available --> creating robot".formatted(Thread.currentThread().getName()));
                     var robot = RobotFactory.createRobotWithManager(robotType);
                     pushBackToMap(robot);
                 }
@@ -89,7 +95,7 @@ public class Manager {
 
             if (task.actionType == Task.Action.SHUT_DOWN) {
                 if (robotQueue.isEmpty()) {
-                    System.out.println("Thread: " + Thread.currentThread().getName() + " all robots " + robotType + " are down already");
+                    logService.log("Thread: %s, all robots %s are down already".formatted(Thread.currentThread().getName(), robotType));
                     return;
                 }
                 List<Robot> tmp = new ArrayList<>();
@@ -101,8 +107,8 @@ public class Manager {
 
     private void executeTask(Task task, Robot robot) {
         switch (task.actionType) {
-            case Task.Action.DO_WORK -> robot.doWork(task);
-            case Task.Action.SHUT_DOWN -> robot.shutDown();
+            case DO_WORK -> robot.doWork(task);
+            case SHUT_DOWN -> robot.shutDown();
         }
     }
 }
