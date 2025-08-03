@@ -2,10 +2,14 @@ package org.example.robot;
 
 import org.example.Task;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public abstract class AbstractRobot implements Robot {
     private static int counter = 0;
 
-    private boolean isBusy;
+    private final ExecutorService singleThreadExecutor;
+    private volatile boolean isBusy;
     private final long workingTime;
 
     protected final Robot.Type type;
@@ -15,22 +19,28 @@ public abstract class AbstractRobot implements Robot {
         this.type = type;
         this.id = ++counter;
         this.workingTime = workingTime;
+        this.singleThreadExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, type + "-" + id));
     }
 
     @Override
     public void doWork(Task task) {
-        isBusy = true;
-        System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", task is: " + task.payload);
-        sleep(workingTime);
-        isBusy = false;
+        singleThreadExecutor.submit(() -> {
+            isBusy = true;
+            System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", task is: " + task.payload);
+            sleep(workingTime);
+            isBusy = false;
+        });
     }
 
     @Override
     public void shutDown() {
-        isBusy = true;
-        System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", do shutdown");
-        sleep(workingTime);
-        isBusy = false;
+        singleThreadExecutor.submit(() -> {
+            isBusy = true;
+            System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", do shutdown");
+            sleep(workingTime);
+            isBusy = false;
+        });
+        singleThreadExecutor.shutdown();
     }
 
     @Override

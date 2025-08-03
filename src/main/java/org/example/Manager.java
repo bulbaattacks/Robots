@@ -24,7 +24,7 @@ public class Manager {
         return !taskQueue.isEmpty();
     }
 
-    public void addTaskToQueue(Task task) {
+    public void addTask(Task task) {
         taskQueue.add(task);
     }
 
@@ -36,7 +36,7 @@ public class Manager {
 
     public void manageWork() {
         if (!hasTask()) {
-            System.out.println("Thread: " + Thread.currentThread().getName() +  ", no tasks available");
+            System.out.println("Thread: " + Thread.currentThread().getName() + ", no tasks available");
             return;
         }
 
@@ -50,10 +50,14 @@ public class Manager {
     private void assignTaskForOneRobot(Task task) {
         var robotType = task.robotType;
         var robotQueue = availableRobotMap.get(robotType);
-        System.out.println("Thread: " + Thread.currentThread().getName() +  ", assigne task "  + task.payload + " to robot: " + robotType);
+        System.out.println("Thread: " + Thread.currentThread().getName() + " task for one robot " + robotType + " --> " + task.actionType);
 
         var robot = robotQueue.peek();
-        if (robot == null || robot.isBusy()) {
+        if (robot == null && task.actionType == Task.Action.SHUT_DOWN) {
+            System.out.println("Thread: " + Thread.currentThread().getName() + " all robots are down already");
+            return;
+        }
+        if (robot == null || robot.isBusy() && task.actionType != Task.Action.SHUT_DOWN) {
             robot = RobotFactory.createRobotWithManager(robotType);
         } else {
             robot = robotQueue.poll();
@@ -66,7 +70,7 @@ public class Manager {
     }
 
     private void assignTaskForAllRobots(Task task) {
-        System.out.println("Thread: " + Thread.currentThread().getName() +  ", assign task to all robots " + task.actionType);
+        System.out.println("Thread: " + Thread.currentThread().getName() + ", assign task to all robots " + task.actionType);
 
         availableRobotMap.forEach((robotType, robotQueue) -> {
             if (robotQueue.isEmpty()) {
