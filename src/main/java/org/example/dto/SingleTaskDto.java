@@ -1,11 +1,16 @@
 package org.example.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.example.model.Task;
 import org.example.model.robot.Robot;
 
 public class SingleTaskDto {
+    @NotNull
     private Task.Action actionType;
+    @NotNull
     private Robot.Type robotType;
+    @Size(min = 0, max = 100, message = "Expected length 100 symbols max")
     private String payload;
 
     public Task.Action getActionType() {

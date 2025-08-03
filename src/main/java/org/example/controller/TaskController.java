@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import jakarta.validation.Valid;
 import org.example.dto.BroadcastTaskDto;
 import org.example.dto.SingleTaskDto;
 import org.example.model.Task;
@@ -19,7 +20,7 @@ public class TaskController {
     }
 
     @PostMapping("/tasks/broadcast")
-    public void broadcast(@RequestBody BroadcastTaskDto dto) {
+    public void broadcast(@Valid @RequestBody BroadcastTaskDto dto) {
         Task task;
         switch (dto.getActionType()) {
             case DO_WORK -> task = Task.workForAll(dto.getPayload());
@@ -31,7 +32,7 @@ public class TaskController {
     }
 
     @PostMapping("/tasks/single")
-    public void single(@RequestBody SingleTaskDto dto) {
+    public void single(@Valid @RequestBody SingleTaskDto dto) {
         Task task;
         switch (dto.getActionType()) {
             case DO_WORK -> task = Task.work(dto.getRobotType(), dto.getPayload());
