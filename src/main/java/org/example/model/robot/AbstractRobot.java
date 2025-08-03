@@ -11,16 +11,16 @@ public abstract class AbstractRobot implements Robot {
 
     private final LogService logService = LogService.getInstance();
     private final Robot.Type type;
-    private final int id;
+    private final String compositeKey;
     private final long workingTime;
     private final ExecutorService singleThreadExecutor;
     private volatile boolean isBusy;
 
     protected AbstractRobot(Robot.Type type, long workingTime) {
         this.type = type;
-        this.id = ++counter;
+        this.compositeKey = "%s-%d".formatted(type, ++counter);
         this.workingTime = workingTime;
-        this.singleThreadExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, type + "-" + id));
+        this.singleThreadExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, compositeKey));
     }
 
     @Override
@@ -47,6 +47,11 @@ public abstract class AbstractRobot implements Robot {
     @Override
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public String getCompositeKey() {
+        return compositeKey;
     }
 
     @Override

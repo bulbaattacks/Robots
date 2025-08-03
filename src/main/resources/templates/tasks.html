@@ -52,6 +52,13 @@
 </section>
 
 <section>
+    <h2>Available Robots</h2>
+    <form id="availableRobots">
+        <button type="submit">Get Robots</button>
+    </form>
+</section>
+
+<section>
     <h2>Real-Time Logs</h2>
     <div id="logs"></div>
 </section>
@@ -83,6 +90,12 @@
           robotType: fd.get('robotType'),
           payload: fd.get('payload')
         });
+      });
+
+    document.getElementById('availableRobots')
+      .addEventListener('submit', e => {
+        e.preventDefault();
+        fetch('/api/robots', {method: 'GET'});
       });
 
     document.getElementById('broadcastForm')
