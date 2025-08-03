@@ -1,34 +1,52 @@
 package org.example.robot;
 
-import org.example.Manager;
 import org.example.Task;
 
-import java.util.UUID;
-
 public abstract class AbstractRobot implements Robot {
-    private final Manager manager;
-    protected final Robot.Type type;
-    protected final UUID id;
+    private static int counter = 0;
 
-    protected AbstractRobot(Manager manager, Robot.Type type) {
-        this.manager = manager;
+    private boolean isBusy;
+    private final long workingTime;
+
+    protected final Robot.Type type;
+    protected final int id;
+
+    protected AbstractRobot(Robot.Type type, long workingTime) {
         this.type = type;
-        this.id = UUID.randomUUID();
+        this.id = ++counter;
+        this.workingTime = workingTime;
     }
 
     @Override
     public void doWork(Task task) {
-        System.out.println(getType() + " id: " + id + " DO WORK " + task.payload);
-        manager.notifyTaskCompleted(this);
+        isBusy = true;
+        System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", task is: " + task.payload);
+        sleep(workingTime);
+        isBusy = false;
     }
 
     @Override
     public void shutDown() {
-        System.out.println(getType() + " id: " + id + " SHUTDOWN");
+        isBusy = true;
+        System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", do shutdown");
+        sleep(workingTime);
+        isBusy = false;
     }
 
     @Override
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public boolean isBusy() {
+        return isBusy;
+    }
+
+    protected void sleep(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
     }
 }

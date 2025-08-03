@@ -1,10 +1,8 @@
 package org.example.robot;
 
-import org.example.Manager;
-
 public class RobotCleaner extends AbstractRobot {
 
-    public RobotCleaner(Manager manager) {
-        super(manager, Robot.Type.CLEANER);
+    public RobotCleaner() {
+        super(Robot.Type.CLEANER, 500);
     }
 }

@@ -1,26 +1,16 @@
 package org.example.robot;
 
-import org.example.Manager;
-
 public interface RobotFactory {
-    static Robot createRobotWithManager(Robot.Type type, Manager manager) {
+    static Robot createRobotWithManager(Robot.Type type) {
+        System.out.println("Thread: " + Thread.currentThread().getName() + ", create robot " + type);
         switch (type) {
             case Robot.Type.TERMINATOR -> {
-                return new RobotTerminator(manager);
+                return new RobotTerminator();
             }
             case Robot.Type.CLEANER -> {
-                return new RobotCleaner(manager);
+                return new RobotCleaner();
             }
-            case Robot.Type.UNIVERSAL -> {
-                int idx = (int) (Math.random() * Robot.Type.values().length);
-                var rt = Robot.Type.values()[idx];
-                if (rt == Robot.Type.UNIVERSAL) {
-                    rt = Robot.Type.values()[idx-1];
-                }
-                System.out.println("hello from createRobotWithManager " + rt);
-                return createRobotWithManager(rt, manager);
-            }
-            default -> throw new IllegalArgumentException("Robot type not supported: " + type);
+            default -> throw new IllegalArgumentException("Robot type " + type + " not supported" );
         }
     }
 }

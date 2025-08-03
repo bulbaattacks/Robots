@@ -16,7 +16,6 @@ public class Manager {
 
     public Manager() {
         for (var rt : Robot.Type.values()) {
-            if (rt == Robot.Type.UNIVERSAL) continue;
             availableRobotMap.put(rt, new LinkedBlockingQueue<>());
         }
     }
@@ -29,43 +28,67 @@ public class Manager {
         taskQueue.add(task);
     }
 
-    public void addRobotToMap(Robot robot) {
-        var robotQueue = availableRobotMap.computeIfAbsent(robot.getType(), k -> new LinkedBlockingQueue<>());
-        robotQueue.add(robot);
+    public void pushBackToMap(Robot robot) {
+        availableRobotMap
+                .computeIfAbsent(robot.getType(), k -> new LinkedBlockingQueue<>())
+                .add(robot);
     }
 
     public void manageWork() {
-        var task = taskQueue.poll();
-        var robotType = task.robotType;
-        
-        if (robotType == Robot.Type.UNIVERSAL) {
-            List<Robot> tmp = new ArrayList<>();
-            availableRobotMap.forEach((rt, rq) -> rq.drainTo(tmp));
-
-            if (tmp.isEmpty()) {
-                System.out.println("NO ROBOTS AVAILABLE --> CREATING ROBOT");
-                var robot = RobotFactory.createRobotWithManager(robotType, this);
-                tmp.add(robot);
-            }
-            tmp.forEach(robot -> executeTask(task, robot));
+        if (!hasTask()) {
+            System.out.println("Thread: " + Thread.currentThread().getName() +  ", no tasks available");
             return;
         }
 
-        var robot = availableRobotMap.get(robotType).poll();
-        if (robot == null) {
-            robot = RobotFactory.createRobotWithManager(robotType, this);
+        var task = taskQueue.poll();
+        switch (task.taskType) {
+            case SINGLE -> assignTaskForOneRobot(task);
+            case BROADCAST -> assignTaskForAllRobots(task);
         }
-        executeTask(task, robot);
     }
 
-    public void notifyTaskCompleted(Robot robot) {
-        addRobotToMap(robot);
+    private void assignTaskForOneRobot(Task task) {
+        var robotType = task.robotType;
+        var robotQueue = availableRobotMap.get(robotType);
+        System.out.println("Thread: " + Thread.currentThread().getName() +  ", assigne task "  + task.payload + " to robot: " + robotType);
+
+        var robot = robotQueue.peek();
+        if (robot == null || robot.isBusy()) {
+            robot = RobotFactory.createRobotWithManager(robotType);
+        } else {
+            robot = robotQueue.poll();
+        }
+        executeTask(task, robot);
+        if (task.actionType == Task.Action.SHUT_DOWN) {
+            return;
+        }
+        pushBackToMap(robot);
+    }
+
+    private void assignTaskForAllRobots(Task task) {
+        System.out.println("Thread: " + Thread.currentThread().getName() +  ", assign task to all robots " + task.actionType);
+
+        availableRobotMap.forEach((robotType, robotQueue) -> {
+            if (robotQueue.isEmpty()) {
+                System.out.println("Thread: " + Thread.currentThread().getName() + ", no robots available --> creating robot");
+                var robot = RobotFactory.createRobotWithManager(robotType);
+                pushBackToMap(robot);
+            }
+            if (task.actionType == Task.Action.DO_WORK) {
+                robotQueue.forEach(robot -> executeTask(task, robot));
+            }
+            if (task.actionType == Task.Action.SHUT_DOWN) {
+                List<Robot> tmp = new ArrayList<>();
+                robotQueue.drainTo(tmp);
+                tmp.forEach(robot -> executeTask(task, robot));
+            }
+        });
     }
 
     private void executeTask(Task task, Robot robot) {
-        switch (task.taskType) {
-            case Task.Type.DO_WORK -> robot.doWork(task);
-            case Task.Type.SHUT_DOWN -> robot.shutDown();
+        switch (task.actionType) {
+            case Task.Action.DO_WORK -> robot.doWork(task);
+            case Task.Action.SHUT_DOWN -> robot.shutDown();
         }
     }
 }
