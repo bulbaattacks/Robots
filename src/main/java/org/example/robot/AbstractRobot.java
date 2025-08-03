@@ -26,7 +26,7 @@ public abstract class AbstractRobot implements Robot {
     public void doWork(Task task) {
         singleThreadExecutor.submit(() -> {
             isBusy = true;
-            System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", task is: " + task.payload);
+            System.out.println("Thread: " + Thread.currentThread().getName() + ", task is: " + task.payload);
             sleep(workingTime);
             isBusy = false;
         });
@@ -36,7 +36,7 @@ public abstract class AbstractRobot implements Robot {
     public void shutDown() {
         singleThreadExecutor.submit(() -> {
             isBusy = true;
-            System.out.println("Thread: " + Thread.currentThread().getName() + ", " + getType() + " id: " + id + ", do shutdown");
+            System.out.println("Thread: " + Thread.currentThread().getName() + ", do shutdown");
             sleep(workingTime);
             isBusy = false;
         });

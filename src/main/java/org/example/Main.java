@@ -16,11 +16,18 @@ public class Main {
         manager.addTask(Task.shutDown(Robot.Type.TERMINATOR));
 
 
-//        manager.addTask(Task.work(Robot.Type.CLEANER, "..CLEAN..CLEAN..CLEAN.."));
-//        manager.addTask(Task.shutDown(Robot.Type.CLEANER));
-//
-//        manager.addTask(Task.workForAll("..TASK..FOR..ALL.."));
-//        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.work(Robot.Type.CLEANER, "..CLEAN..CLEAN..CLEAN.."));
+        manager.addTask(Task.shutDown(Robot.Type.CLEANER));
+
+        manager.addTask(Task.workForAll("..TASK..FOR..ALL.."));
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
+        manager.addTask(Task.shutDownForAll());
 
         while (manager.hasTask()) {
             Thread.sleep(500);

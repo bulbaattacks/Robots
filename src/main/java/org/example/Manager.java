@@ -53,35 +53,45 @@ public class Manager {
         System.out.println("Thread: " + Thread.currentThread().getName() + " task for one robot " + robotType + " --> " + task.actionType);
 
         var robot = robotQueue.peek();
-        if (robot == null && task.actionType == Task.Action.SHUT_DOWN) {
-            System.out.println("Thread: " + Thread.currentThread().getName() + " all robots are down already");
-            return;
-        }
-        if (robot == null || robot.isBusy() && task.actionType != Task.Action.SHUT_DOWN) {
-            robot = RobotFactory.createRobotWithManager(robotType);
-        } else {
-            robot = robotQueue.poll();
-        }
-        executeTask(task, robot);
+
         if (task.actionType == Task.Action.SHUT_DOWN) {
-            return;
+            if (robot == null) {
+                System.out.println("Thread: " + Thread.currentThread().getName() + " all robots " + robotType + " are down already");
+                return;
+            }
+            robot = robotQueue.poll();
+            executeTask(task, robot);
         }
-        pushBackToMap(robot);
+
+        if (task.actionType == Task.Action.DO_WORK) {
+            if (robot == null || robot.isBusy()) {
+                robot = RobotFactory.createRobotWithManager(robotType);
+            } else {
+                robot = robotQueue.poll();
+            }
+            executeTask(task, robot);
+            pushBackToMap(robot);
+        }
     }
 
     private void assignTaskForAllRobots(Task task) {
         System.out.println("Thread: " + Thread.currentThread().getName() + ", assign task to all robots " + task.actionType);
 
         availableRobotMap.forEach((robotType, robotQueue) -> {
-            if (robotQueue.isEmpty()) {
-                System.out.println("Thread: " + Thread.currentThread().getName() + ", no robots available --> creating robot");
-                var robot = RobotFactory.createRobotWithManager(robotType);
-                pushBackToMap(robot);
-            }
             if (task.actionType == Task.Action.DO_WORK) {
+                if (robotQueue.isEmpty()) {
+                    System.out.println("Thread: " + Thread.currentThread().getName() + ", no robots available --> creating robot");
+                    var robot = RobotFactory.createRobotWithManager(robotType);
+                    pushBackToMap(robot);
+                }
                 robotQueue.forEach(robot -> executeTask(task, robot));
             }
+
             if (task.actionType == Task.Action.SHUT_DOWN) {
+                if (robotQueue.isEmpty()) {
+                    System.out.println("Thread: " + Thread.currentThread().getName() + " all robots " + robotType + " are down already");
+                    return;
+                }
                 List<Robot> tmp = new ArrayList<>();
                 robotQueue.drainTo(tmp);
                 tmp.forEach(robot -> executeTask(task, robot));
