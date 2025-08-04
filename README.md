@@ -72,7 +72,7 @@
 ```
 mvn spring-boot:run
 ```
-2. Перейти на Web UI
+2. Перейти на [Web UI](http://localhost:8080/tasks)
 ```
 http://localhost:8080/tasks
 ```
